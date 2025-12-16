@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Sorteador de Nomes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: #f2f2f2;
+        }
+        textarea {
+            width: 90%;
+            max-width: 400px;
+            height: 150px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        #resultado {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Sorteador de Nomes</h2>
+
+<p>Digite um nome por linha:</p>
+<textarea id="nomes"></textarea><br>
+
+<button onclick="sortear()">Sortear</button>
+
+<div id="resultado"></div>
+
+<script>
+function sortear() {
+    const texto = document.getElementById("nomes").value;
+    const lista = texto.split("\n").filter(n => n.trim() !== "");
+
+    if (lista.length === 0) {
+        document.getElementById("resultado").innerText = "Digite algum nome!";
+        return;
+    }
+
+    const sorteado = lista[Math.floor(Math.random() * lista.length)];
+    document.getElementById("resultado").innerText = "Sorteado: " + sorteado;
+}
+</script>
+
+</body>
+</html>
