@@ -1,59 +1,154 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Sorteador de Nomes</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-            background: #f2f2f2;
-        }
-        textarea {
-            width: 90%;
-            max-width: 400px;
-            height: 150px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-        #resultado {
-            margin-top: 20px;
-            font-size: 20px;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
+  <meta charset="UTF-8">
+  <title>Sorteio de Alcoolemia</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<h2>Sorteador de Nomes</h2>
-
-<p>Digite um nome por linha:</p>
-<textarea id="nomes"></textarea><br>
-
-<button onclick="sortear()">Sortear</button>
-
-<div id="resultado"></div>
-
-<script>
-function sortear() {
-    const texto = document.getElementById("nomes").value;
-    const lista = texto.split("\n").filter(n => n.trim() !== "");
-
-    if (lista.length === 0) {
-        document.getElementById("resultado").innerText = "Digite algum nome!";
-        return;
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background: #f2f2f2;
     }
 
-    const sorteado = lista[Math.floor(Math.random() * lista.length)];
-    document.getElementById("resultado").innerText = "Sorteado: " + sorteado;
-}
-</script>
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px 25px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background-color: #0077cc;
+      color: white;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    #resultado {
+      margin-top: 30px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>Sorteio de Alcoolemia</h2>
+
+  <button onclick="sortear()">Sortear</button>
+
+  <div id="resultado"></div>
+
+  <script>
+    const nomes = [
+      "MARCO ANTONIO CAMPOS GOMES",
+      "HEVERTON APARECIDO TIBURSKI",
+      "MARCOS MARTINELLI NETO",
+      "EVERALDO DA SILVA PEREIRA",
+      "MAGNA PEREIRA DA SILVA",
+      "PATRICIA APARECIDA BRANDAO",
+      "JOENIL MARQUES RIBEIRO",
+      "ANTONIO MESQUITA S JUNIOR",
+      "FRANCISCO CARLOS ABSOLON SOARES",
+      "JAIRO JOSE DA SILVA AMORIM",
+      "JORGE MARQUES DE ARRUDA",
+      "JOSILAINE DOS SANTOS S ALMEIDA",
+      "RENAN NEVES DE MOURA",
+      "CLAUDINEIA CARLA PEREIRA",
+      "CLAYSSON ASSIS DA COSTA",
+      "CLEBER VITOR DA SILVA MORAIS",
+      "EDIL MARIA DA SILVA",
+      "EDIVANDRO CARVALHO DA SILVA",
+      "ERICA DE OLIVEIRA XAVIER",
+      "EUCLIDES DIVINO P LARANJEIRA",
+      "GEIZIBEL LEITE PARANHOS DA SILVA",
+      "GILMAR MAGALHAES DE ALMEIDA",
+      "IVONE FURQUIM HENNRICHS",
+      "JAILTON NUNES MORAES",
+      "JEFERSON LUCAS DA S SIQUEIRA",
+      "JEREMIAS GONCALVES JAIME",
+      "KATIA FIDELIS SILVA OLIVEIRA",
+      "KELVIN JOHN RODRIGUES BOM DESPACHO",
+      "KEVIN ALEXSSANDER M SOARES",
+      "LETICIA DE MORAES DIAS",
+      "LEVINA ANTONE",
+      "LUCAS EDUARDO DE SOUZA",
+      "LUIZ FERNANDO PERANDRE DA ROCHA",
+      "MARIA NILCE PAZ CARVALHO",
+      "MARINALVA ROSANGELA DE MORAES",
+      "NILSON FABIANO AKERLEY",
+      "REGINA CATARINA DA SILVA",
+      "RENATA MARIA DA SILVA",
+      "SANDRA MARIA PAES DE A SILVA",
+      "WILLIAN LOSS MACIEL",
+      "EDILAINE NOBRE RODRIGUES",
+      "AGENOR GONCALO DA SILVA",
+      "EDJAIRSON DA SILVA PEREIRA",
+      "RENATO PIRES DA CUNHA",
+      "LUIZ CARLOS MARQUES FONTES",
+      "SEBASTIÃO ALEXANDRE DE AZEVEDO",
+      "JUCINEIDE DIAS GONCALVES",
+      "CARLOS PINTO DE SANTANA",
+      "EDILAYNE DE OLIVEIRA ARRUDA",
+      "ELIANE CONCEICAO DA COSTA E SANTOS SILVA",
+      "VINICIUS VALERIO PEREIRA",
+      "EDEMAR LEMES DO NASCIMENTO",
+      "LEANDRO HENNRICHS",
+      "LUCAS VALÉRIO DUTRA",
+      "JOACIL GONÇALO DE CAMPOS",
+      "ADRIANA QUEZO",
+      "ANDERSON DOS SANTOS GONÇALVES",
+      "EIDECLEIA DO ROSARIO NASCIMENTO CABRAL",
+      "JEFERSON CARLOS GENARO BARBOSA",
+      "JOÃO GUILHERME RAMOS PEDRAÇA",
+      "IGOR PINHEIRO DA SILVA",
+      "YONE MOTA CAMPOS LIMA",
+      "ALEXANDRE EDUARDO A OLIVEIRA",
+      "LUDMILLA VANESSA CAMPOS BARROS",
+      "LUCIANO DE OLIVEIRA MOURA",
+      "IZABELLA NASCIMENTO MENEZES",
+      "ELIEZER FIGUEIREDO DA SILVA",
+      "RUTH OLIVEIRA DE ARRUDA SILVA",
+      "BLONDINE BLANC",
+      "LEYDSON BARROS SIQUEIRA",
+      "MARIA LUIZA F DE FIGUEIREDO",
+      "RAFAELA CENE MORAES",
+      "JOAO HENRIQUE BONINI",
+      "ROSINEIDE MACEDO BARROS",
+      "KELEN KARINA LELIS DE ALMEIDA MAINARDES",
+      "NATAN RONY RODRIGUES BOM DESPACHO",
+      "JULIA ARAUJO SILVA",
+      "CLODOALDO DAS GRACAS CIPRIANO",
+      "BRUNO CAMPOS DE MORAES",
+      "JONATHAS EDUARDO DA S PEREIRA",
+      "MAXSUEL DELUQUI DA S FONSECA",
+      "LAURA CRISTINA DE AZEVEDO",
+      "DANIEL VICTOR DOS SANTOS DUTRA",
+      "KENYA GUIA FERREIRA",
+      "AMAURY AUGUSTO ARAUJO",
+      "VITOR TADEU ALVES ARAUJO",
+      "VALQUIRIA ERICA GOMES DE LIMA",
+      "ARTHUR RODRIGUES SANTANA",
+      "LORRAYNE KAROLINE S SILVA",
+      "VALQUIRIA LUZIA GOMES MANCILLA",
+      "JOAO ANDRE CAMARGO FOLES"
+    ];
+
+    function sortear() {
+      const sorteado = nomes[Math.floor(Math.random() * nomes.length)];
+      document.getElementById("resultado").innerText =
+        "Selecionado para alcoolemia: " + sorteado;
+    }
+  </script>
 
 </body>
 </html>
