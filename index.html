@@ -5,6 +5,9 @@
   <title>Sorteio de Alcoolemia</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- Biblioteca para gerar Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -66,6 +69,7 @@
   <div id="listaHistorico"></div>
 
   <button onclick="limparHistorico()">Limpar Histórico</button>
+  <button onclick="exportarExcel()">Exportar para Excel</button>
 
   <script>
     const nomes = [
@@ -175,12 +179,12 @@
       const historico = JSON.parse(localStorage.getItem("historicoSorteios")) || [];
 
       const novoRegistro = {
+        numero: historico.length + 1,
         data: new Date().toLocaleString(),
         sorteado: sorteado
       };
 
       historico.push(novoRegistro);
-
       localStorage.setItem("historicoSorteios", JSON.stringify(historico));
 
       carregarHistorico();
@@ -192,10 +196,10 @@
 
       div.innerHTML = "";
 
-      historico.forEach((item, index) => {
+      historico.forEach((item) => {
         div.innerHTML += `
           <div class="historico-item">
-            <strong>Sorteio ${index + 1}</strong><br>
+            <strong>Sorteio ${item.numero}</strong><br>
             Data: ${item.data}<br>
             Selecionado: ${item.sorteado}
           </div>
@@ -208,6 +212,27 @@
         localStorage.removeItem("historicoSorteios");
         carregarHistorico();
       }
+    }
+
+    function exportarExcel() {
+      const historico = JSON.parse(localStorage.getItem("historicoSorteios")) || [];
+
+      if (historico.length === 0) {
+        alert("Não há dados no histórico para exportar.");
+        return;
+      }
+
+      const dados = historico.map(item => ({
+        "Sorteio Nº": item.numero,
+        "Data": item.data,
+        "Selecionado": item.sorteado
+      }));
+
+      const planilha = XLSX.utils.json_to_sheet(dados);
+      const livro = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(livro, planilha, "Historico");
+
+      XLSX.writeFile(livro, "Historico_Sorteio_Alcoolemia.xlsx");
     }
 
     window.onload = function() {
