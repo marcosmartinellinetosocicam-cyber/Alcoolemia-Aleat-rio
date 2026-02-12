@@ -57,13 +57,10 @@
 
   <div id="botoes">
     <button onclick="sortear()">Sortear</button>
-    <button onclick="baixarCSV()">Baixar CSV</button>
+    <button onclick="abrirHistorico()">Ver Histórico</button>
   </div>
 
   <div id="resultado"></div>
-  <hr />
-  <h3>Histórico Local</h3>
-  <div id="listaHistorico"></div>
 
   <script>
     const nomes = [
@@ -176,46 +173,39 @@
       };
       historico.push(novoRegistro);
       localStorage.setItem("historicoSorteios", JSON.stringify(historico));
-      carregarHistorico();
     }
 
-    function carregarHistorico() {
+    function abrirHistorico() {
       const historico = JSON.parse(localStorage.getItem("historicoSorteios")) || [];
-      const div = document.getElementById("listaHistorico");
-      div.innerHTML = "";
-      historico.forEach(item => {
-        div.innerHTML += `
-          <div class="historico-item">
-            <strong>Sorteio ${item.numero}</strong><br />
-            Data: ${item.data}<br />
-            Selecionado: ${item.sorteado}
-          </div>
-        `;
-      });
+      const novaJanela = window.open("", "_blank");
+      novaJanela.document.write("<h2>Histórico de Sorteios</h2>");
+      novaJanela.document.write('<button onclick="baixarCSV()">Baixar CSV</button>');
+      novaJanela.document.write("<div id='listaHistorico'></div>");
+      novaJanela.document.write("<script>");
+      novaJanela.document.write("const historico = " + JSON.stringify(historico) + ";");
+      novaJanela.document.write(`
+        const div = document.getElementById('listaHistorico');
+        historico.forEach(item => {
+          div.innerHTML += '<div class="historico-item"><strong>Sorteio ' + item.numero + '</strong><br />Data: ' + item.data + '<br />Selecionado: ' + item.sorteado + '</div>';
+        });
+        function baixarCSV() {
+          if (historico.length === 0) { alert('Não há sorteios!'); return; }
+          let csv = "Número,Data,Sorteado\\n";
+          historico.forEach(item => { csv += item.numero + ',"' + item.data + '","' + item.sorteado + '"\\n'; });
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'historico_sorteios.csv';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+      `);
+      novaJanela.document.write("</script>");
+      novaJanela.document.close();
     }
-
-    function baixarCSV() {
-      const historico = JSON.parse(localStorage.getItem("historicoSorteios")) || [];
-      if (historico.length === 0) {
-        alert("Não há sorteios para baixar!");
-        return;
-      }
-      let csv = "Número,Data,Sorteado\n";
-      historico.forEach(item => {
-        csv += `${item.numero},"${item.data}","${item.sorteado}"\n`;
-      });
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "historico_sorteios.csv";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    window.onload = carregarHistorico;
   </script>
 </body>
 </html>
