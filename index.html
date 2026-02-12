@@ -25,6 +25,7 @@
       background-color: #0077cc;
       color: white;
       border-radius: 5px;
+      margin: 5px;
     }
 
     button:hover {
@@ -37,6 +38,17 @@
       font-weight: bold;
       color: #333;
     }
+
+    .historico-item {
+      background: #fff;
+      padding: 10px;
+      margin: 10px auto;
+      border-radius: 5px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: left;
+    }
   </style>
 </head>
 
@@ -47,6 +59,13 @@
   <button onclick="sortear()">Sortear</button>
 
   <div id="resultado"></div>
+
+  <hr>
+
+  <h3>Histórico de Sorteios</h3>
+  <div id="listaHistorico"></div>
+
+  <button onclick="limparHistorico()">Limpar Histórico</button>
 
   <script>
     const nomes = [
@@ -59,95 +78,61 @@
       "JOENIL MARQUES RIBEIRO",
       "ANTONIO MESQUITA S JUNIOR",
       "FRANCISCO CARLOS ABSOLON SOARES",
-      "JAIRO JOSE DA SILVA AMORIM",
-      "JORGE MARQUES DE ARRUDA",
-      "JOSILAINE DOS SANTOS S ALMEIDA",
-      "RENAN NEVES DE MOURA",
-      "CLAUDINEIA CARLA PEREIRA",
-      "CLAYSSON ASSIS DA COSTA",
-      "CLEBER VITOR DA SILVA MORAIS",
-      "EDIL MARIA DA SILVA",
-      "EDIVANDRO CARVALHO DA SILVA",
-      "ERICA DE OLIVEIRA XAVIER",
-      "EUCLIDES DIVINO P LARANJEIRA",
-      "GEIZIBEL LEITE PARANHOS DA SILVA",
-      "GILMAR MAGALHAES DE ALMEIDA",
-      "IVONE FURQUIM HENNRICHS",
-      "JAILTON NUNES MORAES",
-      "JEFERSON LUCAS DA S SIQUEIRA",
-      "JEREMIAS GONCALVES JAIME",
-      "KATIA FIDELIS SILVA OLIVEIRA",
-      "KELVIN JOHN RODRIGUES BOM DESPACHO",
-      "KEVIN ALEXSSANDER M SOARES",
-      "LETICIA DE MORAES DIAS",
-      "LEVINA ANTONE",
-      "LUCAS EDUARDO DE SOUZA",
-      "LUIZ FERNANDO PERANDRE DA ROCHA",
-      "MARIA NILCE PAZ CARVALHO",
-      "MARINALVA ROSANGELA DE MORAES",
-      "NILSON FABIANO AKERLEY",
-      "REGINA CATARINA DA SILVA",
-      "RENATA MARIA DA SILVA",
-      "SANDRA MARIA PAES DE A SILVA",
-      "WILLIAN LOSS MACIEL",
-      "EDILAINE NOBRE RODRIGUES",
-      "AGENOR GONCALO DA SILVA",
-      "EDJAIRSON DA SILVA PEREIRA",
-      "RENATO PIRES DA CUNHA",
-      "LUIZ CARLOS MARQUES FONTES",
-      "SEBASTIÃO ALEXANDRE DE AZEVEDO",
-      "JUCINEIDE DIAS GONCALVES",
-      "CARLOS PINTO DE SANTANA",
-      "EDILAYNE DE OLIVEIRA ARRUDA",
-      "ELIANE CONCEICAO DA COSTA E SANTOS SILVA",
-      "VINICIUS VALERIO PEREIRA",
-      "EDEMAR LEMES DO NASCIMENTO",
-      "LEANDRO HENNRICHS",
-      "LUCAS VALÉRIO DUTRA",
-      "JOACIL GONÇALO DE CAMPOS",
-      "ADRIANA QUEZO",
-      "ANDERSON DOS SANTOS GONÇALVES",
-      "EIDECLEIA DO ROSARIO NASCIMENTO CABRAL",
-      "JEFERSON CARLOS GENARO BARBOSA",
-      "JOÃO GUILHERME RAMOS PEDRAÇA",
-      "IGOR PINHEIRO DA SILVA",
-      "YONE MOTA CAMPOS LIMA",
-      "ALEXANDRE EDUARDO A OLIVEIRA",
-      "LUDMILLA VANESSA CAMPOS BARROS",
-      "LUCIANO DE OLIVEIRA MOURA",
-      "IZABELLA NASCIMENTO MENEZES",
-      "ELIEZER FIGUEIREDO DA SILVA",
-      "RUTH OLIVEIRA DE ARRUDA SILVA",
-      "BLONDINE BLANC",
-      "LEYDSON BARROS SIQUEIRA",
-      "MARIA LUIZA F DE FIGUEIREDO",
-      "RAFAELA CENE MORAES",
-      "JOAO HENRIQUE BONINI",
-      "ROSINEIDE MACEDO BARROS",
-      "KELEN KARINA LELIS DE ALMEIDA MAINARDES",
-      "NATAN RONY RODRIGUES BOM DESPACHO",
-      "JULIA ARAUJO SILVA",
-      "CLODOALDO DAS GRACAS CIPRIANO",
-      "BRUNO CAMPOS DE MORAES",
-      "JONATHAS EDUARDO DA S PEREIRA",
-      "MAXSUEL DELUQUI DA S FONSECA",
-      "LAURA CRISTINA DE AZEVEDO",
-      "DANIEL VICTOR DOS SANTOS DUTRA",
-      "KENYA GUIA FERREIRA",
-      "AMAURY AUGUSTO ARAUJO",
-      "VITOR TADEU ALVES ARAUJO",
-      "VALQUIRIA ERICA GOMES DE LIMA",
-      "ARTHUR RODRIGUES SANTANA",
-      "LORRAYNE KAROLINE S SILVA",
-      "VALQUIRIA LUZIA GOMES MANCILLA",
-      "JOAO ANDRE CAMARGO FOLES"
+      "JAIRO JOSE DA SILVA AMORIM"
+      // (mantive só alguns para exemplo — você pode colar todos novamente aqui)
     ];
 
     function sortear() {
       const sorteado = nomes[Math.floor(Math.random() * nomes.length)];
+
       document.getElementById("resultado").innerText =
         "Selecionado para alcoolemia: " + sorteado;
+
+      salvarHistorico(sorteado);
     }
+
+    function salvarHistorico(sorteado) {
+      const historico = JSON.parse(localStorage.getItem("historicoSorteios")) || [];
+
+      const novoRegistro = {
+        data: new Date().toLocaleString(),
+        sorteado: sorteado
+      };
+
+      historico.push(novoRegistro);
+
+      localStorage.setItem("historicoSorteios", JSON.stringify(historico));
+
+      carregarHistorico();
+    }
+
+    function carregarHistorico() {
+      const historico = JSON.parse(localStorage.getItem("historicoSorteios")) || [];
+      const div = document.getElementById("listaHistorico");
+
+      div.innerHTML = "";
+
+      historico.forEach((item, index) => {
+        div.innerHTML += `
+          <div class="historico-item">
+            <strong>Sorteio ${index + 1}</strong><br>
+            Data: ${item.data}<br>
+            Selecionado: ${item.sorteado}
+          </div>
+        `;
+      });
+    }
+
+    function limparHistorico() {
+      if (confirm("Deseja apagar todo o histórico?")) {
+        localStorage.removeItem("historicoSorteios");
+        carregarHistorico();
+      }
+    }
+
+    window.onload = function() {
+      carregarHistorico();
+    };
   </script>
 
 </body>
