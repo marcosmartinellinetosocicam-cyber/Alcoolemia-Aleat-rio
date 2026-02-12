@@ -5,9 +5,6 @@
   <title>Sorteio de Alcoolemia</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Biblioteca para gerar Excel -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -65,13 +62,13 @@
 
   <hr>
 
-  <h3>Histórico de Sorteios</h3>
+  <h3>Histórico Local</h3>
   <div id="listaHistorico"></div>
 
-  <button onclick="limparHistorico()">Limpar Histórico</button>
-  <button onclick="exportarExcel()">Exportar para Excel</button>
-
   <script>
+
+    const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbyjRmZak7X8ViuBHkwNzTGxVgEZ0tYXgcn_qiku8S6IBXW2FLhQ7ZK49LKXcbFpBLBVhQ/exec";
+
     const nomes = [
       "MARCO ANTONIO CAMPOS GOMES",
       "HEVERTON APARECIDO TIBURSKI",
@@ -188,6 +185,19 @@
       localStorage.setItem("historicoSorteios", JSON.stringify(historico));
 
       carregarHistorico();
+
+      enviarParaPlanilha(novoRegistro);
+    }
+
+    function enviarParaPlanilha(registro) {
+      fetch(URL_PLANILHA, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(registro)
+      });
     }
 
     function carregarHistorico() {
@@ -207,37 +217,10 @@
       });
     }
 
-    function limparHistorico() {
-      if (confirm("Deseja apagar todo o histórico?")) {
-        localStorage.removeItem("historicoSorteios");
-        carregarHistorico();
-      }
-    }
-
-    function exportarExcel() {
-      const historico = JSON.parse(localStorage.getItem("historicoSorteios")) || [];
-
-      if (historico.length === 0) {
-        alert("Não há dados no histórico para exportar.");
-        return;
-      }
-
-      const dados = historico.map(item => ({
-        "Sorteio Nº": item.numero,
-        "Data": item.data,
-        "Selecionado": item.sorteado
-      }));
-
-      const planilha = XLSX.utils.json_to_sheet(dados);
-      const livro = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(livro, planilha, "Historico");
-
-      XLSX.writeFile(livro, "Historico_Sorteio_Alcoolemia.xlsx");
-    }
-
     window.onload = function() {
       carregarHistorico();
     };
+
   </script>
 
 </body>
