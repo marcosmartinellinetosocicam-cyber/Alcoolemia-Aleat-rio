@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Sorteio de Alcoolemia</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,11 +11,9 @@
       padding: 20px;
       background: #f2f2f2;
     }
-
     h2 {
       margin-bottom: 20px;
     }
-
     button {
       padding: 12px 25px;
       font-size: 16px;
@@ -27,18 +24,15 @@
       border-radius: 5px;
       margin: 5px;
     }
-
     button:hover {
       background-color: #005fa3;
     }
-
     #resultado {
       margin-top: 30px;
       font-size: 22px;
       font-weight: bold;
       color: #333;
     }
-
     .historico-item {
       background: #fff;
       padding: 10px;
@@ -51,22 +45,15 @@
     }
   </style>
 </head>
-
 <body>
-
   <h2>Sorteio de Alcoolemia</h2>
-
   <button onclick="sortear()">Sortear</button>
-
   <div id="resultado"></div>
-
-  <hr>
-
+  <hr />
   <h3>Histórico Local</h3>
   <div id="listaHistorico"></div>
 
   <script>
-
     const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbwSytSqTv4c2qCjz7EE9CCdMF0HZzmPefhMlRHUUrucJbUhCyhXsdY5dGi3Wxfu6eBnRA/exec";
 
     const nomes = [
@@ -165,63 +152,58 @@
 
     function sortear() {
       const sorteado = nomes[Math.floor(Math.random() * nomes.length)];
-
       document.getElementById("resultado").innerText =
         "Selecionado para alcoolemia: " + sorteado;
-
       salvarHistorico(sorteado);
     }
 
     function salvarHistorico(sorteado) {
       const historico = JSON.parse(localStorage.getItem("historicoSorteios")) || [];
-
       const novoRegistro = {
         numero: historico.length + 1,
         data: new Date().toLocaleString(),
         sorteado: sorteado
       };
-
       historico.push(novoRegistro);
       localStorage.setItem("historicoSorteios", JSON.stringify(historico));
-
       carregarHistorico();
-
       enviarParaPlanilha(novoRegistro);
     }
 
     function enviarParaPlanilha(registro) {
       fetch(URL_PLANILHA, {
         method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(registro)
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log("Enviado com sucesso para a planilha");
+        } else {
+          console.error("Falha no envio para planilha:", response.status);
+        }
+      })
+      .catch(error => {
+        console.error("Erro na requisição:", error);
       });
     }
 
     function carregarHistorico() {
       const historico = JSON.parse(localStorage.getItem("historicoSorteios")) || [];
       const div = document.getElementById("listaHistorico");
-
       div.innerHTML = "";
-
-      historico.forEach((item) => {
+      historico.forEach(item => {
         div.innerHTML += `
           <div class="historico-item">
-            <strong>Sorteio ${item.numero}</strong><br>
-            Data: ${item.data}<br>
+            <strong>Sorteio ${item.numero}</strong><br />
+            Data: ${item.data}<br />
             Selecionado: ${item.sorteado}
           </div>
         `;
       });
     }
 
-    window.onload = function() {
-      carregarHistorico();
-    };
-
+    window.onload = carregarHistorico;
   </script>
-
 </body>
 </html>
