@@ -2,104 +2,131 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Sorteio de Alcoolemia</title>
+  <title>Sorteio de Alcoolemia - Unidade VG</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       text-align: center;
-      background: linear-gradient(to right, #74ebd5, #ACB6E5);
+      background: linear-gradient(to right, #1e3c72, #2a5298);
       padding: 30px;
       color: #333;
+      min-height: 100vh;
+      margin: 0;
     }
 
-    h2 {
-      margin-bottom: 20px;
-      font-size: 28px;
-      color: #fff;
-      text-shadow: 1px 1px 2px #000;
+    /* Tela de Login */
+    #telaLogin {
+      background: white;
+      max-width: 350px;
+      margin: 80px auto;
+      padding: 40px 20px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
     }
-
-    .buttons {
-      margin-bottom: 20px;
-    }
-
-    button {
-      padding: 12px 20px;
-      font-size: 16px;
-      margin: 5px;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      transition: 0.3s;
-      font-weight: bold;
-    }
-
-    button:hover {
-      transform: scale(1.05);
-      opacity: 0.9;
-    }
-
-    .sortear {
-      background-color: #ff6f61;
-      color: white;
-    }
-
-    .historico-btn {
-      background-color: #4CAF50;
-      color: white;
-    }
-
-    .baixar-btn {
-      background-color: #2196F3;
-      color: white;
-    }
-
-    .limpar-btn {
-      background-color: #f44336;
-      color: white;
-    }
-
-    #resultado {
-      font-size: 22px;
-      font-weight: bold;
-      margin: 20px 0;
-      color: #fff;
-      text-shadow: 1px 1px 2px #000;
-    }
-
-    #listaHistorico {
-      max-width: 600px;
-      margin: 0 auto;
-      text-align: left;
-      display: none;
-    }
-
-    .historico-item {
-      background: rgba(255,255,255,0.9);
+    #telaLogin h3 { color: #1e3c72; margin-bottom: 20px; }
+    input {
+      width: 85%;
       padding: 12px;
       margin: 10px 0;
+      border: 1px solid #ddd;
       border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      font-size: 16px;
     }
+
+    /* Conteúdo do Sorteio (Escondido) */
+    #conteudoSorteio { display: none; }
+
+    h2 { margin-bottom: 20px; font-size: 28px; color: #fff; text-shadow: 1px 1px 2px #000; }
+    
+    .buttons { margin-bottom: 20px; }
+    button { 
+      padding: 12px 20px; 
+      font-size: 15px; 
+      margin: 5px; 
+      cursor: pointer; 
+      border: none; 
+      border-radius: 8px; 
+      transition: 0.3s; 
+      font-weight: bold; 
+      text-transform: uppercase;
+    }
+    button:hover { transform: scale(1.05); opacity: 0.9; }
+
+    .sortear { background-color: #ff6f61; color: white; width: 200px; font-size: 18px; margin-bottom: 15px; }
+    .historico-btn { background-color: #4CAF50; color: white; }
+    .baixar-btn { background-color: #2196F3; color: white; }
+    .limpar-btn { background-color: #9e9e9e; color: white; }
+
+    #resultado { 
+      font-size: 26px; 
+      font-weight: bold; 
+      margin: 30px 0; 
+      color: #fff; 
+      background: rgba(255,255,255,0.15);
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+      min-width: 310px;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    #listaHistorico { max-width: 600px; margin: 20px auto; text-align: left; display: none; }
+    .historico-item { 
+      background: white; 
+      padding: 15px; 
+      margin: 10px 0; 
+      border-radius: 8px; 
+      border-left: 5px solid #2196F3;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+    }
+    #erro { color: #f44336; font-weight: bold; margin-top: 10px; display: none; }
   </style>
 </head>
 <body>
 
-  <h2>Sorteio de Alcoolemia</h2>
-
-  <div class="buttons">
-    <button class="sortear" onclick="sortear()">Sortear</button>
-    <button class="historico-btn" onclick="toggleHistorico()">Ver/Esconder Histórico</button>
-    <button class="baixar-btn" onclick="baixarCSV()">Baixar CSV</button>
-    <button class="limpar-btn" onclick="limparHistorico()">Limpar Histórico</button>
+  <div id="telaLogin">
+    <h3>Acesso Unidade VG</h3>
+    <input type="text" id="usuario" placeholder="Usuário">
+    <input type="password" id="senha" placeholder="Senha">
+    <br>
+    <button class="sortear" onclick="verificarLogin()" style="width: 90%;">Entrar</button>
+    <p id="erro">Usuário ou Senha incorretos!</p>
   </div>
 
-  <div id="resultado"></div>
+  <div id="conteudoSorteio">
+    <h2>Sorteio de Alcoolemia - VG</h2>
+    
+    <div class="buttons">
+      <button class="sortear" onclick="sortear()">Sortear Nome</button><br>
+      <button class="historico-btn" onclick="toggleHistorico()">Histórico</button>
+      <button class="baixar-btn" onclick="baixarCSV()">Baixar CSV</button>
+      <button class="limpar-btn" onclick="limparHistorico()">Limpar Tudo</button>
+    </div>
 
-  <div id="listaHistorico"></div>
+    <div id="resultado">Aguardando sorteio...</div>
+
+    <div id="listaHistorico"></div>
+  </div>
 
   <script>
+    // --- CREDENCIAIS VÁRZEA GRANDE ---
+    const LOGIN_CORRETO = "Unidade.vg26";
+    const SENHA_CORRETA = "Varzea2026";
+
+    function verificarLogin() {
+      const u = document.getElementById("usuario").value;
+      const s = document.getElementById("senha").value;
+      if(u === LOGIN_CORRETO && s === SENHA_CORRETA) {
+        document.getElementById("telaLogin").style.display = "none";
+        document.getElementById("conteudoSorteio").style.display = "block";
+        atualizarHistorico();
+      } else {
+        document.getElementById("erro").style.display = "block";
+      }
+    }
+
+    // --- LISTA ORIGINAL DE NOMES ---
     const nomes = [
       "MARCO ANTONIO CAMPOS GOMES", "HEVERTON APARECIDO TIBURSKI",
       "MARCOS MARTINELLI NETO", "EVERALDO DA SILVA PEREIRA",
@@ -151,28 +178,33 @@
 
     function sortear() {
       const sorteado = nomes[Math.floor(Math.random() * nomes.length)];
-      document.getElementById("resultado").innerText = "Selecionado: " + sorteado;
+      document.getElementById("resultado").innerHTML = "<small>SELECIONADO:</small><br>" + sorteado;
       salvarHistorico(sorteado);
     }
 
     function salvarHistorico(nome) {
-      const historico = JSON.parse(localStorage.getItem("historicoSorteios")) || [];
-      const registro = { numero: historico.length + 1, data: new Date().toLocaleString(), sorteado: nome };
+      const historico = JSON.parse(localStorage.getItem("hist_vg_26")) || [];
+      const registro = { 
+        numero: historico.length + 1, 
+        data: new Date().toLocaleString('pt-BR'), 
+        sorteado: nome 
+      };
       historico.push(registro);
-      localStorage.setItem("historicoSorteios", JSON.stringify(historico));
+      localStorage.setItem("hist_vg_26", JSON.stringify(historico));
       atualizarHistorico();
     }
 
     function atualizarHistorico() {
-      const historico = JSON.parse(localStorage.getItem("historicoSorteios")) || [];
+      const historico = JSON.parse(localStorage.getItem("hist_vg_26")) || [];
       const div = document.getElementById("listaHistorico");
       div.innerHTML = "";
-      historico.forEach(item => {
-        div.innerHTML += `<div class="historico-item">
-          <strong>Sorteio ${item.numero}</strong><br>
-          Data: ${item.data}<br>
-          Selecionado: ${item.sorteado}
-        </div>`;
+      [...historico].reverse().forEach(item => {
+        div.innerHTML += `
+          <div class="historico-item">
+            <strong>Sorteio #${item.numero}</strong><br>
+            📅 Data: ${item.data}<br>
+            👤 Nome: <strong>${item.sorteado}</strong>
+          </div>`;
       });
     }
 
@@ -182,28 +214,30 @@
     }
 
     function baixarCSV() {
-      const historico = JSON.parse(localStorage.getItem("historicoSorteios")) || [];
-      if(historico.length === 0){ alert("Não há histórico para baixar."); return; }
-      let csv = "Número,Data,Selecionado\n";
+      const historico = JSON.parse(localStorage.getItem("hist_vg_26")) || [];
+      if(historico.length === 0) return alert("Não há dados!");
+      let csv = "Numero,Data,Selecionado\n";
       historico.forEach(item => csv += `${item.numero},"${item.data}","${item.sorteado}"\n`);
-      const blob = new Blob([csv], {type: "text/csv"});
+      const blob = new Blob(["\ufeff" + csv], {type: "text/csv;charset=utf-8;"});
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "historico_sorteios.csv";
+      a.download = "relatorio_alcoolemia_VG.csv";
       a.click();
-      URL.revokeObjectURL(url);
     }
 
     function limparHistorico() {
-      if(confirm("Deseja realmente limpar todo o histórico?")) {
-        localStorage.removeItem("historicoSorteios");
+      if(confirm("Deseja apagar o histórico de Várzea Grande?")) {
+        localStorage.removeItem("hist_vg_26");
+        document.getElementById("resultado").innerText = "Aguardando sorteio...";
         atualizarHistorico();
       }
     }
 
-    window.onload = atualizarHistorico;
+    // Login com tecla Enter
+    document.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') verificarLogin();
+    });
   </script>
-
 </body>
 </html>
