@@ -1,32 +1,861 @@
-async function salvarHistorico(nome) {
+<!DOCTYPE html>
+<html lang="pt-br">
 
-  const URL_APPS_SCRIPT =
-    "https://script.google.com/macros/s/AKfycbx2z5vD2Uydtli-Ia6EQMYUOohp4hHpIzGHW92rKB88g4AknMQWhYKL6KKvARGm27HnnA/exec";
+<head>
+
+  <meta charset="UTF-8">
+
+  <title>Sorteio de Alcoolemia - Unidade VG</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      background: linear-gradient(to right, #1e3c72, #2a5298);
+      padding: 30px;
+      color: #333;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    /* LOGIN */
+
+    #telaLogin {
+      background: white;
+      max-width: 350px;
+      margin: 80px auto;
+      padding: 40px 20px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    #telaLogin h3 {
+      color: #1e3c72;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 85%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    /* CONTEÚDO */
+
+    #conteudoSorteio {
+      display: none;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 28px;
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+    }
+
+    .buttons {
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 15px;
+      margin: 5px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      transition: 0.3s;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+      transform: none;
+    }
+
+    .sortear {
+      background-color: #ff6f61;
+      color: white;
+      width: 200px;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    .historico-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .baixar-btn {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    .limpar-btn {
+      background-color: #9e9e9e;
+      color: white;
+    }
+
+    #resultado {
+
+      font-size: 26px;
+      font-weight: bold;
+      margin: 30px 0;
+      color: #fff;
+
+      background: rgba(255,255,255,0.15);
+
+      padding: 20px;
+
+      border-radius: 10px;
+
+      display: inline-block;
+
+      min-width: 310px;
+
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    #listaHistorico {
+
+      max-width: 600px;
+
+      margin: 20px auto;
+
+      text-align: left;
+
+      display: none;
+    }
+
+    .historico-item {
+
+      background: white;
+
+      padding: 15px;
+
+      margin: 10px 0;
+
+      border-radius: 8px;
+
+      border-left: 5px solid #2196F3;
+
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    #erro {
+
+      color: #f44336;
+
+      font-weight: bold;
+
+      margin-top: 10px;
+
+      display: none;
+    }
+
+    #status {
+
+      color: white;
+
+      margin-top: 10px;
+
+      font-size: 14px;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+  <!-- LOGIN -->
+
+  <div id="telaLogin">
+
+    <h3>Acesso Unidade VG</h3>
+
+    <input
+      type="text"
+      id="usuario"
+      placeholder="Usuário"
+    >
+
+    <input
+      type="password"
+      id="senha"
+      placeholder="Senha"
+    >
+
+    <br>
+
+    <button
+      class="sortear"
+      onclick="verificarLogin()"
+      style="width: 90%;"
+    >
+      Entrar
+    </button>
+
+    <p id="erro">
+      Usuário ou Senha incorretos!
+    </p>
+
+  </div>
+
+
+  <!-- SISTEMA -->
+
+  <div id="conteudoSorteio">
+
+    <h2>
+      Sorteio de Alcoolemia - VG
+    </h2>
+
+
+    <div class="buttons">
+
+      <button
+        class="sortear"
+        id="botaoSortear"
+        onclick="sortear()"
+      >
+        Sortear Nome
+      </button>
+
+      <br>
+
+      <button
+        class="historico-btn"
+        onclick="toggleHistorico()"
+      >
+        Histórico
+      </button>
+
+      <button
+        class="baixar-btn"
+        onclick="baixarCSV()"
+      >
+        Baixar CSV
+      </button>
+
+      <button
+        class="limpar-btn"
+        onclick="limparHistorico()"
+      >
+        Limpar Tudo
+      </button>
+
+    </div>
+
+
+    <div id="resultado">
+      Aguardando sorteio...
+    </div>
+
+
+    <div id="status">
+      Conectando ao histórico online...
+    </div>
+
+
+    <div id="listaHistorico"></div>
+
+  </div>
+
+
+<script>
+
+
+/* =====================================================
+   CONFIGURAÇÃO
+===================================================== */
+
+
+const URL_APPS_SCRIPT =
+"https://script.google.com/macros/s/AKfycbx2z5vD2Uydtli-Ia6EQMYUOohp4hHpIzGHW92rKB88g4AknMQWhYKL6KKvARGm27HnnA/exec";
+
+
+const LOGIN_CORRETO =
+"Unidade.vg26";
+
+
+const SENHA_CORRETA =
+"Varzea2026";
+
+
+const UNIDADE =
+"Várzea Grande";
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+
+function verificarLogin() {
+
+  const usuario =
+    document.getElementById("usuario").value;
+
+  const senha =
+    document.getElementById("senha").value;
+
+
+  if (
+    usuario === LOGIN_CORRETO &&
+    senha === SENHA_CORRETA
+  ) {
+
+    document.getElementById(
+      "telaLogin"
+    ).style.display = "none";
+
+
+    document.getElementById(
+      "conteudoSorteio"
+    ).style.display = "block";
+
+
+    atualizarHistorico();
+
+  } else {
+
+    document.getElementById(
+      "erro"
+    ).style.display = "block";
+
+  }
+
+}
+
+
+/* =====================================================
+   LISTA DE NOMES
+===================================================== */
+
+
+const nomes = [
+  "EVERALDO DA SILVA PEREIRA",
+  "MAGNA PEREIRA DA SILVA",
+  "PATRICIA APARECIDA BRANDAO",
+  "JOENIL MARQUES RIBEIRO",
+  "ANTONIO MESQUITA S JUNIOR",
+  "FRANCISCO CARLOS ABSOLON SOARES",
+  "JAIRO JOSE DA SILVA AMORIM",
+  "JORGE MARQUES DE ARRUDA",
+  "RENAN NEVES DE MOURA",
+  "CLAUDINEIA CARLA PEREIRA",
+  "CLEBER VITOR DA SILVA MORAIS",
+  "EDIL MARIA DA SILVA",
+  "EDIVANDRO CARVALHO DA SILVA",
+  "ERICA DE OLIVEIRA XAVIER",
+  "EUCLIDES DIVINO P LARANJEIRA",
+  "GEIZIBEL LEITE PARANHOS DA SILVA",
+  "GILMAR MAGALHAES DE ALMEIDA",
+  "IVONE FURQUIM HENNRICHS",
+  "JAILTON NUNES MORAES",
+  "JEREMIAS GONCALVES JAIME",
+  "KELVIN JOHN RODRIGUES BOM DESPACHO",
+  "KEVIN ALEXSSANDER M SOARES",
+  "LETICIA DE MORAES DIAS",
+  "LEVINA ANTONE",
+  "LUCAS EDUARDO DE SOUZA",
+  "JOSILAINE DOS SANTOS S ALMEIDA",
+  "LUIZ FERNANDO PERANDRE DA ROCHA",
+  "KATIA FIDELIS SILVA OLIVEIRA",
+  "MARIA NILCE PAZ CARVALHO",
+  "MARIA SUELY PINTO",
+  "MARINALVA ROSANGELA DE MORAES",
+  "NILSON FABIANO AKERLEY",
+  "NILTON DA SILVA ALMEIDA",
+  "REGINA CATARINA DA SILVA",
+  "RENATA MARIA DA SILVA",
+  "SANDRA MARIA PAES DE A SILVA",
+  "WILLIAN LOSS MACIEL",
+  "EDILAINE NOBRE RODRIGUES",
+  "AGENOR GONCALO DA SILVA",
+  "EDJAIRSON DA SILVA PEREIRA",
+  "LUIZ CARLOS MARQUES FONTES",
+  "MICHAEL DOUGLAS PEREIRA DA SILVA",
+  "KIMBERLYN EVELYN DA C SILVA",
+  "FERNANDO MARQUES DE ARRUDA",
+  "CARLOS PINTO DE SANTANA",
+  "EDILAYNE DE OLIVEIRA ARRUDA",
+  "ELIANE CONCEICAO DA COSTA E SANTOS SILVA",
+  "VINICIUS VALERIO PEREIRA",
+  "EDEMAR LEMES DO NASCIMENTO",
+  "LEANDRO HENNRICHS",
+  "LUCAS VALÉRIO DUTRA",
+  "JOACIL GONÇALO DE CAMPOS",
+  "ANDERSON DOS SANTOS GONÇALVES",
+  "PEDRO LUIZ NASCIMENTO BARROS",
+  "EIDECLEIA DO ROSARIO NASCIMENTO CABRAL",
+  "JEFERSON CARLOS GENARO BARBOSA",
+  "JOÃO GUILHERME RAMOS PEDRAÇA",
+  "IGOR PINHEIRO DA SILVA",
+  "YONE MOTA CAMPOS LIMA",
+  "ALEXANDRE EDUARDO A OLIVEIRA",
+  "LUDMILLA VANESSA CAMPOS BARROS",
+  "LUCIANO DE OLIVEIRA MOURA",
+  "IZABELLA NASCIMENTO MENEZES",
+  "ELIEZER FIGUEIREDO DA SILVA",
+  "RUTH OLIVEIRA DE ARRUDA SILVA",
+  "BLONDINE BLANC",
+  "LEYDSON BARROS SIQUEIRA",
+  "RAFAELA CENE MORAES",
+  "JOAO HENRIQUE BONINI",
+  "VALDINEI ROSA DA SILVA",
+  "ROSINEIDE MACEDO BARROS",
+  "KELEN KARINA LELIS DE ALMEIDA MAINARDES",
+  "NATAN RONY RODRIGUES BOM DESPACHO",
+  "JULIA ARAUJO SILVA",
+  "CLODOALDO DAS GRACAS CIPRIANO",
+  "BRUNO CAMPOS DE MORAES",
+  "HELLEN BEATRIZ C L DA SILVA",
+  "JONATHAS EDUARDO DA S PEREIRA",
+  "LAURA CRISTINA DE AZEVEDO",
+  "DANIEL VICTOR DOS SANTOS DUTRA",
+  "AMAURY AUGUSTO ARAUJO",
+  "VITOR TADEU ALVES ARAUJO",
+  "VALQUIRIA ERICA GOMES DE LIMA",
+  "ARTHUR RODRIGUES SANTANA",
+  "LORRAYNE KAROLINE S SILVA",
+  "VALQUIRIA LUZIA GOMES MANCILLA",
+  "JOAO ANDRE CAMARGO FOLES",
+  "JULY ANNE LOPES FELIX",
+  "JESSYKA MAGALHÃES DA SILVA",
+  "IASMIM DENIZE MARIA DA SILVA",
+  "ARTHUR ZANGARI DOS SANTOS",
+  "JOÃO VICTOR DA SILVA PRADO",
+  "GEORGE DOUGLAS CHAVES MACEDO",
+  "GUILHERME AFONSO NASCIMENTO DOS REIS",
+  "WENDER SEBASTIÃO DA SILVA",
+  "DILEIA CORREA DA SILVA",
+  "ELAINE DA COSTA CAMPOS",
+  "THAISA DE ARRUDA AIRES",
+  "MARCELO DE ANDRADE SOUZA",
+  "MARCO ANTONIO CAMPOS GOMES",
+  "LORENA COSTANTINI",
+  "HEVERTON APARECIDO TIBURSKI",
+  "MARCOS MARTINELLI NETO"
+];
+
+
+/* =====================================================
+   SORTEIO
+===================================================== */
+
+
+async function sortear() {
+
+  const botao =
+    document.getElementById("botaoSortear");
+
+  botao.disabled = true;
+
+  botao.innerText = "REGISTRANDO...";
+
+
+  const indice =
+    Math.floor(
+      Math.random() * nomes.length
+    );
+
+
+  const sorteado =
+    nomes[indice];
+
+
+  document.getElementById(
+    "resultado"
+  ).innerHTML =
+    "<small>SELECIONADO:</small><br>" +
+    sorteado;
+
+
+  const sucesso =
+    await salvarHistorico(sorteado);
+
+
+  if (sucesso) {
+
+    document.getElementById(
+      "status"
+    ).innerText =
+      "✓ Sorteio registrado na planilha online.";
+
+    await atualizarHistorico();
+
+  } else {
+
+    document.getElementById(
+      "status"
+    ).innerText =
+      "⚠ Sorteio realizado, mas houve erro ao registrar online.";
+
+  }
+
+
+  botao.disabled = false;
+
+  botao.innerText =
+    "Sortear Nome";
+
+}
+
+
+/* =====================================================
+   SALVAR NA PLANILHA ONLINE
+===================================================== */
+
+
+async function salvarHistorico(nome) {
 
   try {
 
-    const resposta = await fetch(URL_APPS_SCRIPT, {
-      method: "POST",
-      body: JSON.stringify({
-        nome: nome,
-        unidade: "Várzea Grande"
-      })
-    });
+    const resposta =
+      await fetch(
+        URL_APPS_SCRIPT,
+        {
+          method: "POST",
 
-    const resultado = await resposta.json();
+          body: JSON.stringify({
+            nome: nome,
+            unidade: UNIDADE
+          })
+        }
+      );
+
+
+    const resultado =
+      await resposta.json();
+
 
     if (resultado.sucesso) {
-      console.log("Sorteio registrado online:", resultado.numero);
-    } else {
-      console.error("Erro:", resultado.erro);
+
+      return true;
+
     }
+
+
+    console.error(
+      resultado.erro
+    );
+
+    return false;
+
 
   } catch (erro) {
 
-    console.error("Erro ao enviar para a planilha:", erro);
+    console.error(
+      "Erro ao enviar:",
+      erro
+    );
+
+    return false;
+
+  }
+
+}
+
+
+/* =====================================================
+   BUSCAR HISTÓRICO ONLINE
+===================================================== */
+
+
+async function atualizarHistorico() {
+
+  const div =
+    document.getElementById(
+      "listaHistorico"
+    );
+
+
+  div.innerHTML =
+    "<div class='historico-item'>Carregando histórico...</div>";
+
+
+  try {
+
+    const resposta =
+      await fetch(
+        URL_APPS_SCRIPT +
+        "?acao=historico"
+      );
+
+
+    const historico =
+      await resposta.json();
+
+
+    div.innerHTML = "";
+
+
+    if (
+      !Array.isArray(historico) ||
+      historico.length === 0
+    ) {
+
+      div.innerHTML =
+        "<div class='historico-item'>Nenhum sorteio realizado ainda.</div>";
+
+      document.getElementById(
+        "status"
+      ).innerText =
+        "✓ Conectado à planilha online.";
+
+      return;
+
+    }
+
+
+    [...historico]
+      .reverse()
+      .forEach(function(item) {
+
+        div.innerHTML += `
+
+          <div class="historico-item">
+
+            <strong>
+              Sorteio #${item.numero}
+            </strong>
+
+            <br>
+
+            📅 Data:
+            ${item.data}
+
+            <br>
+
+            🕐 Hora:
+            ${item.hora}
+
+            <br>
+
+            👤 Nome:
+            <strong>
+              ${item.sorteado}
+            </strong>
+
+            <br>
+
+            🏢 Unidade:
+            ${item.unidade}
+
+          </div>
+
+        `;
+
+      });
+
+
+    document.getElementById(
+      "status"
+    ).innerText =
+      "✓ Histórico online atualizado.";
+
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao carregar histórico:",
+      erro
+    );
+
+
+    div.innerHTML =
+      "<div class='historico-item'>Não foi possível carregar o histórico online.</div>";
+
+
+    document.getElementById(
+      "status"
+    ).innerText =
+      "⚠ Erro ao conectar com a planilha.";
+
+  }
+
+}
+
+
+/* =====================================================
+   MOSTRAR / OCULTAR HISTÓRICO
+===================================================== */
+
+
+function toggleHistorico() {
+
+  const div =
+    document.getElementById(
+      "listaHistorico"
+    );
+
+
+  if (
+    div.style.display === "none" ||
+    div.style.display === ""
+  ) {
+
+    div.style.display = "block";
+
+    atualizarHistorico();
+
+  } else {
+
+    div.style.display = "none";
+
+  }
+
+}
+
+
+/* =====================================================
+   BAIXAR CSV ONLINE
+===================================================== */
+
+
+async function baixarCSV() {
+
+  try {
+
+    const resposta =
+      await fetch(
+        URL_APPS_SCRIPT +
+        "?acao=historico"
+      );
+
+
+    const historico =
+      await resposta.json();
+
+
+    if (
+      !Array.isArray(historico) ||
+      historico.length === 0
+    ) {
+
+      alert(
+        "Não há dados para baixar!"
+      );
+
+      return;
+
+    }
+
+
+    let csv =
+      "Numero,Data,Hora,Selecionado,Unidade\n";
+
+
+    historico.forEach(
+      function(item) {
+
+        csv +=
+          `${item.numero},"${item.data}","${item.hora}","${item.sorteado}","${item.unidade}"\n`;
+
+      }
+    );
+
+
+    const blob =
+      new Blob(
+        ["\ufeff" + csv],
+        {
+          type:
+            "text/csv;charset=utf-8;"
+        }
+      );
+
+
+    const url =
+      URL.createObjectURL(
+        blob
+      );
+
+
+    const a =
+      document.createElement(
+        "a"
+      );
+
+
+    a.href = url;
+
+    a.download =
+      "relatorio_alcoolemia_VG.csv";
+
+
+    a.click();
+
+
+    URL.revokeObjectURL(
+      url
+    );
+
+
+  } catch (erro) {
 
     alert(
-      "O sorteio foi realizado, mas não foi possível registrar na planilha online."
+      "Não foi possível gerar o relatório."
     );
+
   }
+
 }
+
+
+/* =====================================================
+   LIMPAR HISTÓRICO
+===================================================== */
+
+
+function limparHistorico() {
+
+  alert(
+    "O histórico agora está armazenado na planilha online. Para evitar apagamentos acidentais, a limpeza deve ser feita diretamente no Google Sheets."
+  );
+
+}
+
+
+/* =====================================================
+   ENTER NO LOGIN
+===================================================== */
+
+
+document.addEventListener(
+  "keypress",
+  function(e) {
+
+    if (
+      e.key === "Enter"
+    ) {
+
+      verificarLogin();
+
+    }
+
+  }
+);
+
+</script>
+
+</body>
+
+</html>
