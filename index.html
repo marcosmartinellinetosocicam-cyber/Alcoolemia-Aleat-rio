@@ -1,243 +1,32 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <title>Sorteio de Alcoolemia - Unidade VG</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: center;
-      background: linear-gradient(to right, #1e3c72, #2a5298);
-      padding: 30px;
-      color: #333;
-      min-height: 100vh;
-      margin: 0;
-    }
+async function salvarHistorico(nome) {
 
-    /* Tela de Login */
-    #telaLogin {
-      background: white;
-      max-width: 350px;
-      margin: 80px auto;
-      padding: 40px 20px;
-      border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-    }
-    #telaLogin h3 { color: #1e3c72; margin-bottom: 20px; }
-    input {
-      width: 85%;
-      padding: 12px;
-      margin: 10px 0;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 16px;
-    }
+  const URL_APPS_SCRIPT =
+    "https://script.google.com/macros/s/AKfycbx2z5vD2Uydtli-Ia6EQMYUOohp4hHpIzGHW92rKB88g4AknMQWhYKL6KKvARGm27HnnA/exec";
 
-    /* Conteúdo do Sorteio (Escondido) */
-    #conteudoSorteio { display: none; }
+  try {
 
-    h2 { margin-bottom: 20px; font-size: 28px; color: #fff; text-shadow: 1px 1px 2px #000; }
-    
-    .buttons { margin-bottom: 20px; }
-    button { 
-      padding: 12px 20px; 
-      font-size: 15px; 
-      margin: 5px; 
-      cursor: pointer; 
-      border: none; 
-      border-radius: 8px; 
-      transition: 0.3s; 
-      font-weight: bold; 
-      text-transform: uppercase;
-    }
-    button:hover { transform: scale(1.05); opacity: 0.9; }
-
-    .sortear { background-color: #ff6f61; color: white; width: 200px; font-size: 18px; margin-bottom: 15px; }
-    .historico-btn { background-color: #4CAF50; color: white; }
-    .baixar-btn { background-color: #2196F3; color: white; }
-    .limpar-btn { background-color: #9e9e9e; color: white; }
-
-    #resultado { 
-      font-size: 26px; 
-      font-weight: bold; 
-      margin: 30px 0; 
-      color: #fff; 
-      background: rgba(255,255,255,0.15);
-      padding: 20px;
-      border-radius: 10px;
-      display: inline-block;
-      min-width: 310px;
-      border: 1px solid rgba(255,255,255,0.3);
-    }
-
-    #listaHistorico { max-width: 600px; margin: 20px auto; text-align: left; display: none; }
-    .historico-item { 
-      background: white; 
-      padding: 15px; 
-      margin: 10px 0; 
-      border-radius: 8px; 
-      border-left: 5px solid #2196F3;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-    }
-    #erro { color: #f44336; font-weight: bold; margin-top: 10px; display: none; }
-  </style>
-</head>
-<body>
-
-  <div id="telaLogin">
-    <h3>Acesso Unidade VG</h3>
-    <input type="text" id="usuario" placeholder="Usuário">
-    <input type="password" id="senha" placeholder="Senha">
-    <br>
-    <button class="sortear" onclick="verificarLogin()" style="width: 90%;">Entrar</button>
-    <p id="erro">Usuário ou Senha incorretos!</p>
-  </div>
-
-  <div id="conteudoSorteio">
-    <h2>Sorteio de Alcoolemia - VG</h2>
-    
-    <div class="buttons">
-      <button class="sortear" onclick="sortear()">Sortear Nome</button><br>
-      <button class="historico-btn" onclick="toggleHistorico()">Histórico</button>
-      <button class="baixar-btn" onclick="baixarCSV()">Baixar CSV</button>
-      <button class="limpar-btn" onclick="limparHistorico()">Limpar Tudo</button>
-    </div>
-
-    <div id="resultado">Aguardando sorteio...</div>
-
-    <div id="listaHistorico"></div>
-  </div>
-
-  <script>
-    // --- CREDENCIAIS VÁRZEA GRANDE ---
-    const LOGIN_CORRETO = "Unidade.vg26";
-    const SENHA_CORRETA = "Varzea2026";
-
-    function verificarLogin() {
-      const u = document.getElementById("usuario").value;
-      const s = document.getElementById("senha").value;
-      if(u === LOGIN_CORRETO && s === SENHA_CORRETA) {
-        document.getElementById("telaLogin").style.display = "none";
-        document.getElementById("conteudoSorteio").style.display = "block";
-        atualizarHistorico();
-      } else {
-        document.getElementById("erro").style.display = "block";
-      }
-    }
-
-    // --- LISTA ORIGINAL DE NOMES ---
-    const nomes = [
-      "MARCO ANTONIO CAMPOS GOMES", "HEVERTON APARECIDO TIBURSKI",
-      "MARCOS MARTINELLI NETO", "EVERALDO DA SILVA PEREIRA",
-      "MAGNA PEREIRA DA SILVA", "PATRICIA APARECIDA BRANDAO",
-      "JOENIL MARQUES RIBEIRO", "ANTONIO MESQUITA S JUNIOR",
-      "FRANCISCO CARLOS ABSOLON SOARES", "JAIRO JOSE DA SILVA AMORIM",
-      "JORGE MARQUES DE ARRUDA", "JOSILAINE DOS SANTOS S ALMEIDA",
-      "RENAN NEVES DE MOURA", "CLAUDINEIA CARLA PEREIRA",
-      "CLAYSSON ASSIS DA COSTA", "CLEBER VITOR DA SILVA MORAIS",
-      "EDIL MARIA DA SILVA", "EDIVANDRO CARVALHO DA SILVA",
-      "ERICA DE OLIVEIRA XAVIER", "EUCLIDES DIVINO P LARANJEIRA",
-      "GEIZIBEL LEITE PARANHOS DA SILVA", "GILMAR MAGALHAES DE ALMEIDA",
-      "IVONE FURQUIM HENNRICHS", "JAILTON NUNES MORAES",
-      "JEFERSON LUCAS DA S SIQUEIRA", "JEREMIAS GONCALVES JAIME",
-      "KATIA FIDELIS SILVA OLIVEIRA", "KELVIN JOHN RODRIGUES BOM DESPACHO",
-      "KEVIN ALEXSSANDER M SOARES", "LETICIA DE MORAES DIAS",
-      "LEVINA ANTONE", "LUCAS EDUARDO DE SOUZA",
-      "LUIZ FERNANDO PERANDRE DA ROCHA", "MARIA NILCE PAZ CARVALHO",
-      "MARINALVA ROSANGELA DE MORAES", "NILSON FABIANO AKERLEY",
-      "REGINA CATARINA DA SILVA", "RENATA MARIA DA SILVA",
-      "SANDRA MARIA PAES DE A SILVA", "WILLIAN LOSS MACIEL",
-      "EDILAINE NOBRE RODRIGUES", "AGENOR GONCALO DA SILVA",
-      "EDJAIRSON DA SILVA PEREIRA", "RENATO PIRES DA CUNHA",
-      "LUIZ CARLOS MARQUES FONTES", "SEBASTIÃO ALEXANDRE DE AZEVEDO",
-      "JUCINEIDE DIAS GONCALVES", "CARLOS PINTO DE SANTANA",
-      "EDILAYNE DE OLIVEIRA ARRUDA", "ELIANE CONCEICAO DA COSTA E SANTOS SILVA",
-      "VINICIUS VALERIO PEREIRA", "EDEMAR LEMES DO NASCIMENTO",
-      "LEANDRO HENNRICHS", "LUCAS VALÉRIO DUTRA",
-      "JOACIL GONÇALO DE CAMPOS", "ADRIANA QUEZO",
-      "ANDERSON DOS SANTOS GONÇALVES", "EIDECLEIA DO ROSARIO NASCIMENTO CABRAL",
-      "JEFERSON CARLOS GENARO BARBOSA", "JOÃO GUILHERME RAMOS PEDRAÇA",
-      "IGOR PINHEIRO DA SILVA", "YONE MOTA CAMPOS LIMA",
-      "ALEXANDRE EDUARDO A OLIVEIRA", "LUDMILLA VANESSA CAMPOS BARROS",
-      "LUCIANO DE OLIVEIRA MOURA", "IZABELLA NASCIMENTO MENEZES",
-      "ELIEZER FIGUEIREDO DA SILVA", "RUTH OLIVEIRA DE ARRUDA SILVA",
-      "BLONDINE BLANC", "LEYDSON BARROS SIQUEIRA",
-      "MARIA LUIZA F DE FIGUEIREDO", "RAFAELA CENE MORAES",
-      "JOAO HENRIQUE BONINI", "ROSINEIDE MACEDO BARROS",
-      "KELEN KARINA LELIS DE ALMEIDA MAINARDES", "NATAN RONY RODRIGUES BOM DESPACHO",
-      "JULIA ARAUJO SILVA", "CLODOALDO DAS GRACAS CIPRIANO",
-      "BRUNO CAMPOS DE MORAES", "JONATHAS EDUARDO DA S PEREIRA",
-      "MAXSUEL DELUQUI DA S FONSECA", "LAURA CRISTINA DE AZEVEDO",
-      "DANIEL VICTOR DOS SANTOS DUTRA", "KENYA GUIA FERREIRA",
-      "AMAURY AUGUSTO ARAUJO", "VITOR TADEU ALVES ARAUJO",
-      "VALQUIRIA ERICA GOMES DE LIMA", "ARTHUR RODRIGUES SANTANA",
-      "LORRAYNE KAROLINE S SILVA", "VALQUIRIA LUZIA GOMES MANCILLA",
-      "JOAO ANDRE CAMARGO FOLES"
-    ];
-
-    function sortear() {
-      const sorteado = nomes[Math.floor(Math.random() * nomes.length)];
-      document.getElementById("resultado").innerHTML = "<small>SELECIONADO:</small><br>" + sorteado;
-      salvarHistorico(sorteado);
-    }
-
-    function salvarHistorico(nome) {
-      const historico = JSON.parse(localStorage.getItem("hist_vg_26")) || [];
-      const registro = { 
-        numero: historico.length + 1, 
-        data: new Date().toLocaleString('pt-BR'), 
-        sorteado: nome 
-      };
-      historico.push(registro);
-      localStorage.setItem("hist_vg_26", JSON.stringify(historico));
-      atualizarHistorico();
-    }
-
-    function atualizarHistorico() {
-      const historico = JSON.parse(localStorage.getItem("hist_vg_26")) || [];
-      const div = document.getElementById("listaHistorico");
-      div.innerHTML = "";
-      [...historico].reverse().forEach(item => {
-        div.innerHTML += `
-          <div class="historico-item">
-            <strong>Sorteio #${item.numero}</strong><br>
-            📅 Data: ${item.data}<br>
-            👤 Nome: <strong>${item.sorteado}</strong>
-          </div>`;
-      });
-    }
-
-    function toggleHistorico() {
-      const div = document.getElementById("listaHistorico");
-      div.style.display = div.style.display === "none" ? "block" : "none";
-    }
-
-    function baixarCSV() {
-      const historico = JSON.parse(localStorage.getItem("hist_vg_26")) || [];
-      if(historico.length === 0) return alert("Não há dados!");
-      let csv = "Numero,Data,Selecionado\n";
-      historico.forEach(item => csv += `${item.numero},"${item.data}","${item.sorteado}"\n`);
-      const blob = new Blob(["\ufeff" + csv], {type: "text/csv;charset=utf-8;"});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "relatorio_alcoolemia_VG.csv";
-      a.click();
-    }
-
-    function limparHistorico() {
-      if(confirm("Deseja apagar o histórico de Várzea Grande?")) {
-        localStorage.removeItem("hist_vg_26");
-        document.getElementById("resultado").innerText = "Aguardando sorteio...";
-        atualizarHistorico();
-      }
-    }
-
-    // Login com tecla Enter
-    document.addEventListener('keypress', function (e) {
-      if (e.key === 'Enter') verificarLogin();
+    const resposta = await fetch(URL_APPS_SCRIPT, {
+      method: "POST",
+      body: JSON.stringify({
+        nome: nome,
+        unidade: "Várzea Grande"
+      })
     });
-  </script>
-</body>
-</html>
+
+    const resultado = await resposta.json();
+
+    if (resultado.sucesso) {
+      console.log("Sorteio registrado online:", resultado.numero);
+    } else {
+      console.error("Erro:", resultado.erro);
+    }
+
+  } catch (erro) {
+
+    console.error("Erro ao enviar para a planilha:", erro);
+
+    alert(
+      "O sorteio foi realizado, mas não foi possível registrar na planilha online."
+    );
+  }
+}
